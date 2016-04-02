@@ -5,7 +5,7 @@ pkgInfo = require "pkginfo-async"
 walkup = require "node-walkup"
 Q = require 'q'
 
-createTag = ( mod, pkg ) ->
+fileTag = ( mod, pkg ) ->
   filename = mod.filename or mod.id
   basePath = pkg.dirname
   dir = path.dirname filename
@@ -16,26 +16,26 @@ createTag = ( mod, pkg ) ->
   tag
 
 moduleTag = ( mod, cb ) ->
-  pkgPath = []
   dir = path.dirname( mod.filename or mod.id ) unless typeof mod is "string"
-  walkup "package.json", cwd : dir, ( err, matches ) ->
-    for m in matches
-      do ( m ) ->
-        defer = Q.defer()
-        pkgPath.push defer.promise
-        pkgInfo m.dir, ( err, pkg ) ->
-          return defer.reject err if err?
-          defer.resolve pkg
+  walkup "package.json", cwd : dir
+  .then ( matches ) ->
+    all = for m in matches
+      pkgInfo m.dir
+    Q.all all
+  .then ( all ) ->
+    suffix = fileTag mod, all[ 0 ]
+    names = for p in all.reverse()
+      p.name
+    tag = names.join "/"
+    tag += ":#{suffix}"
+    cb null, tag if cb?
+    tag
+  .fail ( err ) -> 
+    cb err if cb?
+    throw err
 
-    Q.all( pkgPath )
-    .then ( all ) ->
-      suffix = createTag mod, all[ 0 ]
-      names = for p in all.reverse()
-        p.name
-      tag = names.join ":"
-      tag += ":#{suffix}"
-      cb null, tag
-    .fail ( err ) -> cb err
+
+moduleTag.fileTag = fileTag
 
 
 module.exports = moduleTag

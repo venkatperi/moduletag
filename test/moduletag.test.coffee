@@ -6,9 +6,14 @@ describe "moduletag", ->
 
   it "create module tag", ( done ) ->
     moduleTag module, ( err, tag ) ->
-      console.log tag
       tag.should.equal "moduletag:test/moduletag.test"
       done()
 
+  it "returns a promise", ( done ) ->
+    moduleTag module
+    .then ( tag ) ->
+      tag.should.equal "moduletag:test/moduletag.test"
+      done()
+    .fail done
 
 
