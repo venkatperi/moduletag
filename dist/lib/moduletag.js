@@ -1,6 +1,8 @@
-var Q, fileTag, moduleTag, path, pkgInfo, strLeft, strRight, walkup;
+var Q, fileTag, moduleTag, path, pkgInfo, strLeft, strRight, walkup, _;
 
 path = require('path');
+
+_ = require("underscore");
 
 strRight = require("underscore.string/strRight");
 
@@ -45,7 +47,6 @@ moduleTag = function(mod, cb) {
     return Q.all(all);
   }).then(function(all) {
     var names, p, suffix, tag;
-    suffix = fileTag(mod, all[0]);
     names = (function() {
       var _i, _len, _ref, _results;
       _ref = all.reverse();
@@ -57,6 +58,7 @@ moduleTag = function(mod, cb) {
       return _results;
     })();
     tag = names.join("/");
+    suffix = fileTag(mod, all[0]);
     tag += ":" + suffix;
     if (cb != null) {
       cb(null, tag);

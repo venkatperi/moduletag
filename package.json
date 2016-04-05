@@ -1,6 +1,6 @@
 {
   "name": "moduletag",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/venkatperi/moduletag.git"
@@ -8,8 +8,9 @@
   "preferGlobal": false,
   "description": "create a 'tag' for node modules",
   "dependencies": {
-    "node-walkup": "file:../node-walkup",
-    "pkginfo-async": "file:../pkgInfo-async",
+    "node-walkup": "^1.0.2",
+    "pkginfo-async": "^1.0.3",
+    "q": "^1.4.1",
     "underscore": "^1.8.3",
     "underscore.string": "^3.3.4"
   },

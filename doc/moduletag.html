@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><title>moduletag</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="moduletag"><meta name="groc-project-path" content="lib/moduletag.coffee"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path">lib/moduletag.coffee</div></div><div id="document"><div class="segment"><div class="code"><div class="wrapper">path = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
+_ = <span class="hljs-built_in">require</span> <span class="hljs-string">"underscore"</span>
+strRight = <span class="hljs-built_in">require</span> <span class="hljs-string">"underscore.string/strRight"</span>
+strLeft = <span class="hljs-built_in">require</span> <span class="hljs-string">"underscore.string/strLeft"</span>
+pkgInfo = <span class="hljs-built_in">require</span> <span class="hljs-string">"pkginfo-async"</span>
+walkup = <span class="hljs-built_in">require</span> <span class="hljs-string">"node-walkup"</span>
+Q = <span class="hljs-built_in">require</span> <span class="hljs-string">'q'</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Public: Creates a <code>tag</code> for a package file as a path fragment from the
+ package base dir</p>
+<pre><code>  &lt;filetag&gt; ::= &lt;relative path to module&gt;/&lt;filename without ext&gt;</code></pre>
+<ul>
+<li><code>mod</code>  The file/module for which to create the tag (Object|String)</li>
+<li><code>pkg</code> Package info from <code>pkginfo-async</code> for the package containing the above module</li>
+</ul>
+<p>Returns The filetag as a String</p></div></div><div class="code"><div class="wrapper"><span class="hljs-function"><span class="hljs-title">fileTag</span> = <span class="hljs-params">( mod, pkg )</span> -&gt;</span>
+  filename = mod.filename <span class="hljs-keyword">or</span> mod.id
+  basePath = pkg.dirname
+  dir = path.dirname filename
+  baseName = path.parse( filename ).name
+  tag = path.join dir, baseName
+  tag = strRight tag, basePath
+  tag = strRight tag, <span class="hljs-string">'/'</span>
+  tag</div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Public: Creates a <code>moduletag</code> for a file/module in a package.
+    The format for a module tag is:</p>
+<pre><code>  &lt;moduletag&gt; ::= &lt;package path&gt;:&lt;filetag&gt;</code></pre>
+<p>  where <code>&lt;package path&gt;</code> is forward-slash separated
+  string of the file&#39;s package, and any other packages
+  up the directory tree, e.g. for when the package is
+  installed as a dependency of another package</p>
+<ul>
+<li><code>mod</code> The file/module to create the tag for as {Object|String}</li>
+<li><code>cb</code> Optional callback as {Function}</li>
+</ul>
+<p>Returns a promise which resolves to the <code>moduletag</code></p></div></div><div class="code"><div class="wrapper"><span class="hljs-function"><span class="hljs-title">moduleTag</span> = <span class="hljs-params">( mod, cb )</span> -&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If we received a nodejs module, get the module&#39;s filename or id.
+Otherwise, we should have received filename as a string.
+Get the directory from the filename</p></div></div><div class="code"><div class="wrapper">  dir = path.dirname( mod.filename <span class="hljs-keyword">or</span> mod.id ) <span class="hljs-keyword">unless</span> <span class="hljs-keyword">typeof</span> mod <span class="hljs-keyword">is</span> <span class="hljs-string">"string"</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Walk up the dir tree from the file&#39;s directory and
+find <code>package.json</code> information for its enclosing packages</p></div></div><div class="code"><div class="wrapper">  walkup <span class="hljs-string">"package.json"</span>, cwd : dir
+  .<span class="hljs-keyword">then</span> ( matches ) -&gt;
+    all = <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> matches
+      pkgInfo m.dir
+    Q.all all
+  .<span class="hljs-keyword">then</span> ( all ) -&gt;</div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>the first part of the <code>moduletag</code> is the <code>&lt;package path&gt;</code></p></div></div><div class="code"><div class="wrapper">    names = <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> all.reverse()
+      p.name
+    tag = names.join <span class="hljs-string">"/"</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>the second part of the <code>moduletag</code> is the <code>&lt;file tag&gt;</code></p></div></div><div class="code"><div class="wrapper">    suffix = fileTag mod, all[ <span class="hljs-number">0</span> ]
+    tag += <span class="hljs-string">":<span class="hljs-subst">#{suffix}</span>"</span>
+    cb <span class="hljs-literal">null</span>, tag <span class="hljs-keyword">if</span> cb?
+    tag
+  .fail ( err ) -&gt;
+    cb err <span class="hljs-keyword">if</span> cb?
+    <span class="hljs-keyword">throw</span> err
+
+moduleTag.fileTag = fileTag
+
+<span class="hljs-built_in">module</span>.exports = moduleTag</div></div></div></div></body></html>
