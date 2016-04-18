@@ -8,8 +8,8 @@
   "preferGlobal": false,
   "description": "create a 'tag' for node modules",
   "dependencies": {
-    "node-walkup": "^1.0.2",
-    "pkginfo-async": "^1.0.3",
+    "node-walkup": "^1.0.4",
+    "pkginfo-async": "^1.0.5",
     "q": "^1.4.1",
     "underscore": "^1.8.3",
     "underscore.string": "^3.3.4"
